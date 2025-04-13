@@ -1,13 +1,69 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState, useEffect } from "react";
+import Layout from "@/components/Layout";
+import DashboardSummary from "@/components/DashboardSummary";
+import TransactionForm from "@/components/TransactionForm";
+import InventoryList from "@/components/InventoryList";
+import TransactionHistory from "@/components/TransactionHistory";
+import ExchangeRateChart from "@/components/ExchangeRateChart";
+import CurrencyExchangeForm from "@/components/CurrencyExchangeForm";
 
 const Index = () => {
+  const [currentSection, setCurrentSection] = useState<string>("dashboard");
+
+  // Get section from URL hash on load
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (hash) {
+      setCurrentSection(hash);
+    } else {
+      window.location.hash = "dashboard";
+    }
+    
+    const handleHashChange = () => {
+      const newHash = window.location.hash.replace("#", "");
+      if (newHash) {
+        setCurrentSection(newHash);
+      }
+    };
+    
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  // Render the correct section
+  const renderSection = () => {
+    switch (currentSection) {
+      case "dashboard":
+        return (
+          <div className="space-y-8">
+            <DashboardSummary />
+            <ExchangeRateChart />
+          </div>
+        );
+      case "add-transaction":
+        return <TransactionForm />;
+      case "inventory":
+        return <InventoryList />;
+      case "transactions":
+        return <TransactionHistory />;
+      case "exchange":
+        return (
+          <div className="max-w-md mx-auto">
+            <CurrencyExchangeForm />
+          </div>
+        );
+      default:
+        return <DashboardSummary />;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <Layout initialSection={currentSection}>
+      <div className="min-h-screen">
+        {renderSection()}
       </div>
-    </div>
+    </Layout>
   );
 };
 
